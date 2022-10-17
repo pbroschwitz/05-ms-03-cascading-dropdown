@@ -3,7 +3,9 @@ import * as ReactDom from 'react-dom';
 import { Version } from '@microsoft/sp-core-library';
 import {
   IPropertyPaneConfiguration,
-  PropertyPaneTextField
+  PropertyPaneTextField,
+  PropertyPaneDropdown,
+  IPropertyPaneDropdownOption
 } from '@microsoft/sp-property-pane';
 import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
 // import { IReadonlyTheme } from '@microsoft/sp-component-base';
@@ -19,6 +21,8 @@ export interface IListItemsWebPartProps {
 export default class ListItemsWebPart extends BaseClientSideWebPart<IListItemsWebPartProps> {
   private _isDarkTheme: boolean = false;
   private _environmentMessage: string = '';
+  private lists: IPropertyPaneDropdownOption[];
+  private listsDropdownDisabled: boolean = true;
 
   public render(): void {
     const element: React.ReactElement<IListItemsProps> = React.createElement(ListItems, {
@@ -51,8 +55,10 @@ export default class ListItemsWebPart extends BaseClientSideWebPart<IListItemsWe
             {
               groupName: strings.BasicGroupName,
               groupFields: [
-                PropertyPaneTextField('listName', {
-                  label: strings.ListNameFieldLabel
+                PropertyPaneDropdown('listName', {
+                  label: strings.ListNameFieldLabel,
+                  options: this.lists,
+                  disabled: this.listsDropdownDisabled
                 })
               ]
             }
