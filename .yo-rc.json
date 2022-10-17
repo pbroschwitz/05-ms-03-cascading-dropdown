@@ -1,0 +1,16 @@
+{
+  "@microsoft/generator-sharepoint": {
+    "plusBeta": false,
+    "isCreatingSolution": true,
+    "version": "1.15.2",
+    "libraryName": "react-cascadingdropdowns",
+    "libraryId": "b67eeefa-006f-43df-900d-fbcb5924ecfc",
+    "environment": "spo",
+    "packageManager": "npm",
+    "solutionName": "react-cascadingdropdowns",
+    "solutionShortDescription": "react-cascadingdropdowns description",
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "componentType": "webpart"
+  }
+}
