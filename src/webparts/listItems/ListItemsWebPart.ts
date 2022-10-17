@@ -22,7 +22,6 @@ export default class ListItemsWebPart extends BaseClientSideWebPart<IListItemsWe
   private _isDarkTheme: boolean = false;
   private _environmentMessage: string = '';
   private lists: IPropertyPaneDropdownOption[];
-  private listsDropdownDisabled: boolean = true;
 
   public render(): void {
     const element: React.ReactElement<IListItemsProps> = React.createElement(ListItems, {
@@ -44,6 +43,38 @@ export default class ListItemsWebPart extends BaseClientSideWebPart<IListItemsWe
     return Version.parse('1.0');
   }
 
+  private loadLists(): Promise<IPropertyPaneDropdownOption[]> {
+    return new Promise<IPropertyPaneDropdownOption[]>((
+        resolve: (options: IPropertyPaneDropdownOption[]) => void,
+        reject: (error: unknown) => void
+      ) => {
+      setTimeout((): void => {
+        resolve([{
+          key: 'sharedDocuments',
+          text: 'Shared Documents'
+        },
+        {
+          key: 'myDocuments',
+          text: 'My Documents'
+        }]);
+      }, 2000);
+    });
+  }
+
+  protected onPropertyPaneConfigurationStart(): void {
+    this.context.statusRenderer.displayLoadingIndicator(this.domElement, 'lists');
+    
+    // eslint-disable-next-line no-void
+    void this
+    .loadLists()
+    .then((listOptions: IPropertyPaneDropdownOption[]): void => {
+      this.lists = listOptions;
+      this.context.propertyPane.refresh();
+      this.context.statusRenderer.clearLoadingIndicator(this.domElement);
+      this.render();
+    });
+  }
+
   protected getPropertyPaneConfiguration(): IPropertyPaneConfiguration {
     return {
       pages: [
@@ -58,7 +89,7 @@ export default class ListItemsWebPart extends BaseClientSideWebPart<IListItemsWe
                 PropertyPaneDropdown('listName', {
                   label: strings.ListNameFieldLabel,
                   options: this.lists,
-                  disabled: this.listsDropdownDisabled
+                  disabled: !this.lists
                 })
               ]
             }
@@ -67,4 +98,5 @@ export default class ListItemsWebPart extends BaseClientSideWebPart<IListItemsWe
       ]
     };
   }
+  
 }
