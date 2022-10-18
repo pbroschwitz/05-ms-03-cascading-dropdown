@@ -21,7 +21,10 @@ export interface IListItemsWebPartProps {
 export default class ListItemsWebPart extends BaseClientSideWebPart<IListItemsWebPartProps> {
   private _isDarkTheme: boolean = false;
   private _environmentMessage: string = '';
+  private listsDropdownDisabled: boolean = true;
+  private itemsDropdownDisabled: boolean = true;
   private lists: IPropertyPaneDropdownOption[];
+  private items: unknown;
 
   public render(): void {
     const element: React.ReactElement<IListItemsProps> = React.createElement(ListItems, {
@@ -62,18 +65,78 @@ export default class ListItemsWebPart extends BaseClientSideWebPart<IListItemsWe
     });
   }
 
+  private loadItems(): Promise<IPropertyPaneDropdownOption[]> {
+    if (!this.properties.listName) {
+      // resolve to empty options since no list has been selected
+      return new Promise<IPropertyPaneDropdownOption[]>((
+        resolve: (options: IPropertyPaneDropdownOption[]) => void): void => {
+          resolve([]);
+      });
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const wp: ListItemsWebPart = this;
+
+    return new Promise<IPropertyPaneDropdownOption[]>((
+      resolve: (options: IPropertyPaneDropdownOption[]) => void, 
+      reject: (error: unknown) => void
+    ) => {
+      setTimeout(() => {
+        const items = {
+          sharedDocuments: [
+            {
+              key: 'spfx_presentation.pptx',
+              text: 'SPFx for the masses'
+            },
+            {
+              key: 'hello-world.spapp',
+              text: 'hello-world.spapp'
+            }
+          ],
+          myDocuments: [
+            {
+              key: 'isaiah_cv.docx',
+              text: 'Isaiah CV'
+            },
+            {
+              key: 'isaiah_expenses.xlsx',
+              text: 'Isaiah Expenses'
+            }
+          ]
+        } as {
+          [key: string]: IPropertyPaneDropdownOption[];
+        };
+        resolve(items[wp.properties.listName]);
+      }, 2000);
+    });
+  }
+
   protected onPropertyPaneConfigurationStart(): void {
+    this.listsDropdownDisabled = !this.lists;
+    this.itemsDropdownDisabled = !this.properties.listName || !this.items;
+
+    if (this.lists) {
+      return;
+    }
+
     this.context.statusRenderer.displayLoadingIndicator(this.domElement, 'lists');
     
     // eslint-disable-next-line no-void
     void this
-    .loadLists()
-    .then((listOptions: IPropertyPaneDropdownOption[]): void => {
-      this.lists = listOptions;
-      this.context.propertyPane.refresh();
-      this.context.statusRenderer.clearLoadingIndicator(this.domElement);
-      this.render();
-    });
+      .loadLists()
+      .then((listOptions: IPropertyPaneDropdownOption[]): void => {
+        this.lists = listOptions;
+        this.context.propertyPane.refresh();
+        this.context.statusRenderer.clearLoadingIndicator(this.domElement);
+        this.render();
+      })
+      //.then((itemOptions: IPropertyPaneDropdownOption): void => {
+      .then((itemOptions): void => {
+        this.items = itemOptions;
+        this.context.propertyPane.refresh();
+        this.context.statusRenderer.clearLoadingIndicator(this.domElement);
+        this.render();
+      });
   }
 
   protected getPropertyPaneConfiguration(): IPropertyPaneConfiguration {
@@ -90,12 +153,12 @@ export default class ListItemsWebPart extends BaseClientSideWebPart<IListItemsWe
                 PropertyPaneDropdown('listName', {
                   label: strings.ListNameFieldLabel,
                   options: this.lists,
-                  disabled: !this.lists
+                  disabled: this.listsDropdownDisabled
                 }),
                 PropertyPaneDropdown('itemName', {  
                   label: strings.ItemNameFieldLabel,
                   options: this.lists,
-                  disabled: !this.lists
+                  disabled: this.itemsDropdownDisabled
                 })
               ]
             }
