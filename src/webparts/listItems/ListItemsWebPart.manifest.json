@@ -21,7 +21,8 @@
     },
     "officeFabricIconFontName": "Page",
     "properties": {
-      "description": "List items"
+      "listName": "",
+      "itemName": ""
     }
   }]
 }

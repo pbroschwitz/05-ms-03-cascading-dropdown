@@ -9,3 +9,7 @@
 ![Step 2](step-2.png)
 
 ## Step 3 - fill list
+
+![](step-3.png)
+
+## Step 4 - add the cascade

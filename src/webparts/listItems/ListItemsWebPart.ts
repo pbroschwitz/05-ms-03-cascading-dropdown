@@ -3,7 +3,6 @@ import * as ReactDom from 'react-dom';
 import { Version } from '@microsoft/sp-core-library';
 import {
   IPropertyPaneConfiguration,
-  PropertyPaneTextField,
   PropertyPaneDropdown,
   IPropertyPaneDropdownOption
 } from '@microsoft/sp-property-pane';
@@ -16,6 +15,7 @@ import { IListItemsProps } from './components/IListItemsProps';
 
 export interface IListItemsWebPartProps {
   listName: string;
+  itemName: string;
 }
 
 export default class ListItemsWebPart extends BaseClientSideWebPart<IListItemsWebPartProps> {
@@ -25,7 +25,8 @@ export default class ListItemsWebPart extends BaseClientSideWebPart<IListItemsWe
 
   public render(): void {
     const element: React.ReactElement<IListItemsProps> = React.createElement(ListItems, {
-      listName: this.properties.listName
+      listName: this.properties.listName,
+      itemName: this.properties.itemName
     });
 
     ReactDom.render(element, this.domElement);
@@ -88,6 +89,11 @@ export default class ListItemsWebPart extends BaseClientSideWebPart<IListItemsWe
               groupFields: [
                 PropertyPaneDropdown('listName', {
                   label: strings.ListNameFieldLabel,
+                  options: this.lists,
+                  disabled: !this.lists
+                }),
+                PropertyPaneDropdown('itemName', {  
+                  label: strings.ItemNameFieldLabel,
                   options: this.lists,
                   disabled: !this.lists
                 })

@@ -5,14 +5,16 @@ import { IListItemsProps } from './IListItemsProps';
 export default class ListItems extends React.Component<IListItemsProps, {}> {
   public render(): JSX.Element {
     const {
-      listName
+      listName,
+      itemName
     } = this.props;
-  
+
     return (
-      <section className={`${styles.listItems}`}>
+      <section className={`${styles.listItems} ''}`}>
         <div className={styles.welcome}>
           <img alt="" src={require('../assets/welcome-light.png')} className={styles.welcomeImage} />
-          <div>List name: <strong>{this.props.listName}</strong></div>
+          <div>List name: <strong>{escape(listName)}</strong></div>
+          <div>Item name: <strong>{escape(itemName)}</strong></div>
         </div>
       </section>
     );
