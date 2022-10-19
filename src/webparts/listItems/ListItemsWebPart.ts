@@ -12,6 +12,7 @@ import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
 import * as strings from 'ListItemsWebPartStrings';
 import ListItems from './components/ListItems';
 import { IListItemsProps } from './components/IListItemsProps';
+import ListItems from '../../../lib/webparts/listItems/components/ListItems';
 
 export interface IListItemsWebPartProps {
   listName: string;
@@ -24,7 +25,7 @@ export default class ListItemsWebPart extends BaseClientSideWebPart<IListItemsWe
   private listsDropdownDisabled: boolean = true;
   private itemsDropdownDisabled: boolean = true;
   private lists: IPropertyPaneDropdownOption[];
-  private items: unknown;
+  private items: IPropertyPaneDropdownOption[];
 
   public render(): void {
     const element: React.ReactElement<IListItemsProps> = React.createElement(ListItems, {
@@ -65,17 +66,20 @@ export default class ListItemsWebPart extends BaseClientSideWebPart<IListItemsWe
     });
   }
 
-  private loadItems(): Promise<IPropertyPaneDropdownOption[]> {
-    if (!this.properties.listName) {
-      // resolve to empty options since no list has been selected
-      return new Promise<IPropertyPaneDropdownOption[]>((
-        resolve: (options: IPropertyPaneDropdownOption[]) => void): void => {
-          resolve([]);
-      });
-    }
+  private loadItems(listName: string): Promise<IPropertyPaneDropdownOption[]> {
+    // if (!this.properties.listName) {
+    //   // resolve to empty options since no list has been selected
+    //   return new Promise<IPropertyPaneDropdownOption[]>((
+    //     resolve: (options: IPropertyPaneDropdownOption[]) => void): void => {
+    //       resolve([]);
+    //   });
+    // }
 
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
-    const wp: ListItemsWebPart = this;
+    // if (!this.properties.listName) {
+    //   // resolve to empty options since no list has been selected
+    //   return Promise.resolve();
+    // }
+
 
     return new Promise<IPropertyPaneDropdownOption[]>((
       resolve: (options: IPropertyPaneDropdownOption[]) => void, 
@@ -106,37 +110,54 @@ export default class ListItemsWebPart extends BaseClientSideWebPart<IListItemsWe
         } as {
           [key: string]: IPropertyPaneDropdownOption[];
         };
-        resolve(items[wp.properties.listName]);
+        
+        resolve(items[listName]);
+        debugger
       }, 2000);
     });
   }
 
   protected onPropertyPaneConfigurationStart(): void {
-    this.listsDropdownDisabled = !this.lists;
-    this.itemsDropdownDisabled = !this.properties.listName || !this.items;
+    // this.listsDropdownDisabled = !this.lists;
+    // this.itemsDropdownDisabled = !this.properties.listName || !this.items;
 
-    if (this.lists) {
-      return;
-    }
+    // if (this.lists) {
+    //   return;
+    // }
 
     this.context.statusRenderer.displayLoadingIndicator(this.domElement, 'lists');
     
     // eslint-disable-next-line no-void
-    void this
-      .loadLists()
+    void this.loadLists()
       .then((listOptions: IPropertyPaneDropdownOption[]): void => {
         this.lists = listOptions;
+        // void this.loadItems(this.properties.listName)
         this.context.propertyPane.refresh();
         this.context.statusRenderer.clearLoadingIndicator(this.domElement);
-        this.render();
+        //this.render();
       })
       //.then((itemOptions: IPropertyPaneDropdownOption): void => {
-      .then((itemOptions): void => {
-        this.items = itemOptions;
-        this.context.propertyPane.refresh();
-        this.context.statusRenderer.clearLoadingIndicator(this.domElement);
-        this.render();
-      });
+      // .then((itemOptions): void => {
+      //   debugger
+      //   this.items = itemOptions;
+      //   this.context.propertyPane.refresh();
+      //   this.context.statusRenderer.clearLoadingIndicator(this.domElement);
+      //   this.render();
+      // });
+  }
+
+  protected onPropertyPaneFieldChanged(propertyPath: string, oldValue: any, newValue: any): void {
+    super.onPropertyPaneFieldChanged(propertyPath, oldValue, newValue);
+    if (propertyPath === 'listName') {
+      // TODO Check the newValue 
+      // eslint-disable-next-line no-void
+      void this.loadItems(newValue)
+        .then((itemOptions: IPropertyPaneDropdownOption[]): void => {
+          this.items = itemOptions;
+        })
+      // TODO lodash update
+      this.properties.listName = newValue;
+    }
   }
 
   protected getPropertyPaneConfiguration(): IPropertyPaneConfiguration {
@@ -153,7 +174,7 @@ export default class ListItemsWebPart extends BaseClientSideWebPart<IListItemsWe
                 PropertyPaneDropdown('listName', {
                   label: strings.ListNameFieldLabel,
                   options: this.lists,
-                  disabled: this.listsDropdownDisabled
+                  disabled: !this.lists || this.lists.length === 0
                 }),
                 PropertyPaneDropdown('itemName', {  
                   label: strings.ItemNameFieldLabel,
