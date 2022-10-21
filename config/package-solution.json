@@ -3,10 +3,7 @@
   "solution": {
     "name": "react-cascadingdropdowns-client-side-solution",
     "id": "b67eeefa-006f-43df-900d-fbcb5924ecfc",
-    "version": "1.0.0.0",
-    "includeClientSideAssets": true,
-    "skipFeatureDeployment": true,
-    "isDomainIsolated": false,
+    "version": "1.0.0.2",
     "developer": {
       "name": "",
       "websiteUrl": "",

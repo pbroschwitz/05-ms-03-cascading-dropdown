@@ -11,7 +11,8 @@ import { update } from '@microsoft/sp-lodash-subset';
 import * as strings from 'ListItemsWebPartStrings';
 import ListItems from './components/ListItems';
 import { IListItemsProps } from './components/IListItemsProps';
-
+import { spfi, SPFx } from "@pnp/sp";
+import { getSP } from './pnpjsConfig';
 export interface IListItemsWebPartProps {
   listName: string;
   itemName: string;
@@ -29,8 +30,18 @@ export default class ListItemsWebPart extends BaseClientSideWebPart<IListItemsWe
     ReactDom.render(element, this.domElement);
   }
 
-  protected onInit(): Promise<void> {
-    return super.onInit();
+  protected async onInit(): Promise<void> {
+
+    // eslint-disable-next-line no-void
+    void super.onInit();
+    getSP(this.context)
+    
+    // const sp = spfi().using(SPFx(this.context));
+    // console.log(sp);
+
+    // // get all the items from a list
+    // const items = await sp.web.lists.getByTitle("FAQTest").items.getAll();
+    // console.log('items :>> ', items);
   }
 
   protected onDispose(): void {
