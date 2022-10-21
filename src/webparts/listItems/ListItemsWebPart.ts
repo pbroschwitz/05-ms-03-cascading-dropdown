@@ -11,11 +11,19 @@ import { update } from '@microsoft/sp-lodash-subset';
 import * as strings from 'ListItemsWebPartStrings';
 import ListItems from './components/ListItems';
 import { IListItemsProps } from './components/IListItemsProps';
-import { spfi, SPFx } from "@pnp/sp";
-import { getSP } from './pnpjsConfig';
+import { sp } from "@pnp/sp";
+import { useList } from "../../hooks/useLists";
+
+const { getLists } = useList() ;
+
 export interface IListItemsWebPartProps {
   listName: string;
   itemName: string;
+}
+
+interface IListInfo {
+  Id: string;
+  Title: string;
 }
 
 export default class ListItemsWebPart extends BaseClientSideWebPart<IListItemsWebPartProps> {
@@ -31,17 +39,21 @@ export default class ListItemsWebPart extends BaseClientSideWebPart<IListItemsWe
   }
 
   protected async onInit(): Promise<void> {
-
     // eslint-disable-next-line no-void
-    void super.onInit();
-    getSP(this.context)
-    
-    // const sp = spfi().using(SPFx(this.context));
-    // console.log(sp);
+    return super.onInit().then(async _ => {
+      sp.setup({
+        spfxContext: this.context
+      });
+      
+      await this.getAllLists(this.properties.listName);
 
-    // // get all the items from a list
-    // const items = await sp.web.lists.getByTitle("FAQTest").items.getAll();
-    // console.log('items :>> ', items);
+      // const listOptions: IDropdownOption[] = [];
+      // const lists = await sp.web.lists.select('EntityTypeName', 'Title').filter('Hidden eq false').get();
+      // lists.map((list) => {
+      //   listOptions.push({ key: list.EntityTypeName, text: list.Title });
+      // });
+      // this.listOptions = listOptions;
+    });
   }
 
   protected onDispose(): void {
@@ -50,6 +62,20 @@ export default class ListItemsWebPart extends BaseClientSideWebPart<IListItemsWe
 
   protected get dataVersion(): Version {
     return Version.parse('1.0');
+  }
+
+  private async getAllLists(newValue: any) {
+    try {
+      this.lists = [];
+      const _lists: any = await getLists(newValue);
+      //console.log(_lists);
+      for (const _list of _lists) {
+        this.lists.push({ key: _list.Id, text: _list.Title });
+        console.log('_list.Title %s, _list.Id %s', _list.Title, _list.Id)
+      }
+    } catch (error) {
+      console.log('[LIWP69] error :>>', error);
+    }
   }
 
   private loadLists(): Promise<IPropertyPaneDropdownOption[]> {
