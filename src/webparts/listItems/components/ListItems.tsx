@@ -13,7 +13,6 @@ export default class ListItems extends React.Component<IListItemsProps, {}> {
       itemName
     } = this.props;
 
-
     return (
       <section className={`${styles.listItems} ''}`}>
         <div className={styles.welcome}>
