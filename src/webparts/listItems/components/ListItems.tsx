@@ -9,16 +9,18 @@ export default class ListItems extends React.Component<IListItemsProps, {}> {
 
   public render(): JSX.Element {
     const {
-      listName,
-      itemName
+      listNameLabel,
+      itemNameLabel,
+      columnNameLabel,
     } = this.props;
 
     return (
       <section className={`${styles.listItems} ''}`}>
         <div className={styles.welcome}>
           <img alt="" src={require('../assets/welcome-light.png')} className={styles.welcomeImage} />
-          <div>List name: <strong>{listName}</strong></div>
-          <div>Item name: <strong>{itemName}</strong></div>
+          <div>List name: <strong>{listNameLabel}</strong></div>
+          <div>Item name: <strong>{itemNameLabel}</strong></div>
+          <div>Column name: <strong>{columnNameLabel}</strong></div>
         </div>
       </section>
     );

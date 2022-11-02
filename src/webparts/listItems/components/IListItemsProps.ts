@@ -1,4 +1,8 @@
 export interface IListItemsProps {
-  listName: string;
-  itemName: string;
+  listNameId?: string;
+  listNameLabel?: string;
+  itemNameId?: string;
+  itemNameLabel?: string;
+  columnNameId?: string;
+  columnNameLabel?: string;
 }

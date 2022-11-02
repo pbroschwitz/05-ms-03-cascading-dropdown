@@ -1,5 +1,6 @@
 // SEE https://github.com/pnp/sp-dev-fx-webparts/blob/23760ec883ef04ac27b0c3c2eb01d52cd60fec56/samples/react-list-items-menu/src/webparts/listItemsMenu/ListItemsMenuWebPart.ts
 import { sp } from "@pnp/sp";
+import { reject } from "lodash";
 // REVISIT 
 //import { IListInfo } from "@pnp/sp/lists";
 export const useList = () => {
@@ -18,18 +19,35 @@ export const useList = () => {
     return _lists;
   };
 
-  const getItems = async (listName: string): Promise<unknown[]> => {
+  const getItems = async (listId: string): Promise<unknown[]> => {
     const _items: unknown[] = await sp
       .web
       .lists
-      .getById(listName)
-      .items.getAll();
+      .getById(listId)
+      .items
+      .getAll();
 
     return _items;
   };
 
+  
+  const getColumns = async (listId: string): Promise<unknown[]> => {
+    const _columns: unknown[] = await sp
+      .web
+      .lists
+      .getById(listId)
+      .fields
+      .filter('ReadOnlyField eq false and Hidden eq false')
+      .select('Title, Letter')
+      .get();
+    
+    debugger
+    return _columns;
+  };
+
   return {
     getLists,
-    getItems
+    getItems,
+    getColumns,
   };
 };

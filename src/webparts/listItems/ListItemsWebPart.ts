@@ -14,20 +14,29 @@ import { IListItemsProps } from './components/IListItemsProps';
 import { sp } from "@pnp/sp";
 import { useList } from "../../hooks/useLists";
 
-const { getLists, getItems } = useList() ;
+const { getLists, getItems, getColumns } = useList() ;
 
 export interface IListItemsWebPartProps {
-  listName: string;
-  itemName: string;
+  listNameId: string;
+  listNameLabel: string;
+  itemNameId: string;
+  itemNameLabel: string;
+  columnNameId: string;
+  columnNameLabel: string;
 }
 export default class ListItemsWebPart extends BaseClientSideWebPart<IListItemsWebPartProps> {
   private lists: IPropertyPaneDropdownOption[];
   private items: IPropertyPaneDropdownOption[];
+  private columns: IPropertyPaneDropdownOption[];
 
   public render(): void {
     const element: React.ReactElement<IListItemsProps> = React.createElement(ListItems, {
-      listName: this.properties.listName,
-      itemName: this.properties.itemName
+      listNameId: this.properties.listNameId,
+      listNameLabel: this.properties.listNameLabel,
+      itemNameId: this.properties.itemNameId,
+      itemNameLabel: this.properties.itemNameLabel,
+      columnNameId: this.properties.columnNameId,
+      columnNameLabel: this.properties.columnNameLabel,
     });
     ReactDom.render(element, this.domElement);
   }
@@ -58,6 +67,7 @@ export default class ListItemsWebPart extends BaseClientSideWebPart<IListItemsWe
         lists.push({ key: _list.Id, text: _list.Title });
         console.log('_list.Title %s, _list.Id %s', _list.Title, _list.Id)
       }
+      
       return lists;
     } catch (error) {
       console.log('[LIWP69] error :>>', error);
@@ -65,9 +75,9 @@ export default class ListItemsWebPart extends BaseClientSideWebPart<IListItemsWe
     }
   }
 
-  private async getAllItems(newValue: any): Promise<IPropertyPaneDropdownOption[]> {
+  private async getAllItems(newValue: string): Promise<IPropertyPaneDropdownOption[]> {
     try {
-      const items = [];  
+      const items = [];
       const _items: any = await getItems(newValue);
 
       for (const _list of _items) {
@@ -82,12 +92,38 @@ export default class ListItemsWebPart extends BaseClientSideWebPart<IListItemsWe
     }
   }
 
-  private loadLists(): Promise<IPropertyPaneDropdownOption[]> {
-    return this.getAllLists(this.properties.listName);
+  private async getAllColumns(newList: any): Promise<IPropertyPaneDropdownOption[]> {
+    try {
+      const columns = [];  
+      const _columns: any = await getColumns(newList);
+
+      for (const _list of _columns) {
+        columns.push({ key: _list.Id, text: _list.Title });
+        console.log('_list.Title %s, _list.Id %s', _list.Title, _list.Id)
+      }
+      
+      return columns;
+    } catch (error) {
+      return [];
+    }
   }
 
-  private loadItems(listName: string): Promise<IPropertyPaneDropdownOption[]> {
-    return this.getAllItems(this.properties.listName);
+  private loadLists(): Promise<IPropertyPaneDropdownOption[]> {
+    return this.getAllLists(this.properties.listNameId);
+  }
+
+  private loadItems(listId: string): Promise<IPropertyPaneDropdownOption[]> {
+    return this.getAllItems(listId);
+  }
+
+  private loadColumns(listId: string): Promise<IPropertyPaneDropdownOption[]> {
+    return this.getAllColumns(listId);
+  }
+
+  protected getTextByKey(key: string): string {
+    return this.lists
+      .filter((item) => item.key === key)
+      .map((item) => item.text)[0]
   }
 
   protected onPropertyPaneConfigurationStart(): void {
@@ -100,17 +136,6 @@ export default class ListItemsWebPart extends BaseClientSideWebPart<IListItemsWe
         this.lists = listOptions;
         this.context.propertyPane.refresh();
       })
-    
-    if (this.properties.listName) {
-      // eslint-disable-next-line no-void
-      void this
-        .loadItems(this.properties.listName)
-        .then((itemOptions: IPropertyPaneDropdownOption[]): void => {
-          this.items = itemOptions;
-          this.context.propertyPane.refresh();
-          this.render();
-        })
-    }
   }
 
   protected onPropertyPaneFieldChanged(
@@ -118,24 +143,46 @@ export default class ListItemsWebPart extends BaseClientSideWebPart<IListItemsWe
     oldValue: unknown, 
     newValue: unknown
   ): void {
-    console.log('onPropertyPaneFieldChanged');
-
     super.onPropertyPaneFieldChanged(propertyPath, oldValue, newValue);
 
-    if (
-      propertyPath === 'listName' && 
-      typeof newValue === 'string'
-    ) {
+    if (propertyPath === 'listName') {
+      if (typeof newValue !== 'string') { return }
+
+      //
+      // Lists
+      //
+      const selectedList = this.lists.filter((list: IPropertyPaneDropdownOption) => list.key === newValue)[0]
+      update(this.properties, 'listNameLabel', (): unknown => selectedList.text);
+
+      //
+      // Items
+      //
       this.items = undefined;
+      
       // eslint-disable-next-line no-void
       void this.loadItems(newValue)
-        .then((itemOptions: IPropertyPaneDropdownOption[]): void => {
+      .then((itemOptions: IPropertyPaneDropdownOption[]): void => {
           this.items = itemOptions;
           this.context.propertyPane.refresh();
           this.render();
         })
       // Store new value in web part properties (using lodash update)
-      update(this.properties, propertyPath, (): unknown => newValue);
+      debugger
+      update(this.properties, 'itemNameLabel', (): unknown => newValue);
+
+      // 
+      // Columns
+      //
+      this.columns = undefined;
+      // eslint-disable-next-line no-void
+      void this.loadColumns(newValue)
+        .then((columnOptions: IPropertyPaneDropdownOption[]): void => {
+          this.columns = columnOptions;
+          this.context.propertyPane.refresh();
+          this.render();
+        })
+      // Store new value in web part properties (using lodash update)
+      update(this.properties, 'columnsNameLabel', (): unknown => newValue);
     }
   }
 
@@ -155,13 +202,19 @@ export default class ListItemsWebPart extends BaseClientSideWebPart<IListItemsWe
                   label: strings.ListNameFieldLabel,
                   options: this.lists,
                   disabled: !this.lists || this.lists.length === 0,
-                  selectedKey: this.properties.listName,
+                  selectedKey: this.properties.listNameId,
                 }),
                 PropertyPaneDropdown('itemName', {  
                   label: strings.ItemNameFieldLabel,
                   options: this.items,
                   disabled: !this.items || this.items.length === 0,
-                  selectedKey: this.properties.itemName,
+                  selectedKey: this.properties.itemNameId,
+                }),
+                PropertyPaneDropdown('columnName', {  
+                  label: strings.ColumnNameFieldLabel,
+                  options: this.columns,
+                  disabled: !this.columns || this.columns.length === 0,
+                  selectedKey: this.properties.columnNameId,
                 })
               ]
             }

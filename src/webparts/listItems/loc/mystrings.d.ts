@@ -3,6 +3,7 @@ declare interface IListItemsWebPartStrings {
   BasicGroupName: string;
   ListNameFieldLabel: string;
   ItemNameFieldLabel: string;
+  ColumnNameFieldLabel: string;
 }
 
 declare module 'ListItemsWebPartStrings' {

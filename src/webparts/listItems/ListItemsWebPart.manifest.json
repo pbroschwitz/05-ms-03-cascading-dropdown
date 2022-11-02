@@ -14,15 +14,22 @@
   "preconfiguredEntries": [{
     "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
     "group": { "default": "Advanced" },
-    "title": { "default": "List items" },
+    "title": { "default": "Cascading Dropdowns" },
     "description": { 
       "default": "Default description", 
-      "listName": "List items description" 
+      "listNameId": "List items description (ListNameId)",
+      "listNameLabel": "List items description (ListNameLabel)",
+      "itemNameId": "Item items description (ItemNameId)",
+      "itemNameLabel": "Item items description (ItemNameLabel)" 
     },
     "officeFabricIconFontName": "Page",
     "properties": {
-      "listName": "",
-      "itemName": ""
+      "listNameId": "Please choose a listName (id)",
+      "listNameLabel": "Please choose a listName (label)",
+      "itemNameId": "Please choose an itemName (id)",
+      "itemNameLabel": "Please choose an itemName (label)",
+      "columnNameId": "Please choose a columnName (id)",
+      "columnNameLabel": "Please choose a columnName (label)"
     }
   }]
 }
