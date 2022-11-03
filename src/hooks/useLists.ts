@@ -37,11 +37,10 @@ export const useList = () => {
       .lists
       .getById(listId)
       .fields
-      .filter('ReadOnlyField eq false and Hidden eq false')
-      .select('Title, Letter')
+      .filter(`InternalName eq 'Title' or InternalName eq 'Letter'`)
+      //.select('Title', 'Letter')
       .get();
     
-    debugger
     return _columns;
   };
 

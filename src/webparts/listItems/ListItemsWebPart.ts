@@ -143,11 +143,10 @@ export default class ListItemsWebPart extends BaseClientSideWebPart<IListItemsWe
     oldValue: unknown, 
     newValue: unknown
   ): void {
+    if (typeof newValue !== 'string') { return }
     super.onPropertyPaneFieldChanged(propertyPath, oldValue, newValue);
 
     if (propertyPath === 'listName') {
-      if (typeof newValue !== 'string') { return }
-
       //
       // Lists
       //
@@ -167,7 +166,6 @@ export default class ListItemsWebPart extends BaseClientSideWebPart<IListItemsWe
           this.render();
         })
       // Store new value in web part properties (using lodash update)
-      debugger
       update(this.properties, 'itemNameLabel', (): unknown => newValue);
 
       // 
