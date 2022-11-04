@@ -7,12 +7,14 @@ export const useList = () => {
 
   // Get Lists
   const getLists = async (baseTemplate: number): Promise<unknown[]> => {
-    let _filter: string = "Hidden eq false and ";
+    let _filter = "Hidden eq false and ";
     if (baseTemplate === 0) {
       _filter = _filter + " BaseType ne 1";
-    } else {
+    } 
+    else {
       _filter = _filter + " BaseType eq 1";
     }
+
     const _lists: unknown[] = await sp.web.lists.get();
     //const _lists: IListInfo[] = await sp.web.lists.filter(_filter).get();
 

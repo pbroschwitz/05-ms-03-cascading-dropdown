@@ -23,10 +23,13 @@ export interface IListItemsWebPartProps {
   itemNameLabel: string;
   columnNameId: string;
   columnNameLabel: string;
+  errorMessage: string;
 }
 export default class ListItemsWebPart extends BaseClientSideWebPart<IListItemsWebPartProps> {
   private lists: IPropertyPaneDropdownOption[];
   private items: IPropertyPaneDropdownOption[];
+  private columns: IPropertyPaneDropdownOption[];
+  private errorMessage: string;
   private columns: IPropertyPaneDropdownOption[];
 
   public render(): void {
@@ -58,7 +61,7 @@ export default class ListItemsWebPart extends BaseClientSideWebPart<IListItemsWe
     return Version.parse('1.0');
   }
 
-  private async getAllLists(newValue: any): Promise<IPropertyPaneDropdownOption[]> {
+  private async loadLists(newValue: any): Promise<IPropertyPaneDropdownOption[]> {
     try {
       const lists = [];  
       const _lists: any = await getLists(newValue);
@@ -70,8 +73,8 @@ export default class ListItemsWebPart extends BaseClientSideWebPart<IListItemsWe
       
       return lists;
     } catch (error) {
-      console.log('[LIWP69] error :>>', error);
-      return [];
+      this.errorMessage =  `${error.message} -  please check if site url if valid.` ;
+      this.context.propertyPane.refresh();
     }
   }
 
@@ -82,7 +85,6 @@ export default class ListItemsWebPart extends BaseClientSideWebPart<IListItemsWe
 
       for (const _list of _items) {
         items.push({ key: _list.Id, text: _list.Title });
-        console.log('_list.Title %s, _list.Id %s', _list.Title, _list.Id)
       }
       
       return items;
@@ -127,11 +129,9 @@ export default class ListItemsWebPart extends BaseClientSideWebPart<IListItemsWe
   }
 
   protected onPropertyPaneConfigurationStart(): void {
-    console.log('onPropertyPaneConfigurationStart');
-    
     // eslint-disable-next-line no-void
     void this
-      .loadLists()
+      .loadLists(this.properties.listName)
       .then((listOptions: IPropertyPaneDropdownOption[]): void => {
         this.lists = listOptions;
         this.context.propertyPane.refresh();

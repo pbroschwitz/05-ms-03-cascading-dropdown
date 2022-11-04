@@ -5,10 +5,10 @@
   "componentType": "WebPart",
 
   "version": "*",
-  "manifestVersion": 2,
+  "manifestVersion": 3,
 
   "requiresCustomScript": false,
-  "supportedHosts": ["SharePointWebPart", "TeamsPersonalApp", "TeamsTab", "SharePointFullPage"],
+  "supportedHosts": ["SharePointWebPart", "SharePointFullPage"],
   "supportsThemeVariants": true,
 
   "preconfiguredEntries": [{
