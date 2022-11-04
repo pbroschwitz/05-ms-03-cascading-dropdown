@@ -30,7 +30,6 @@ export default class ListItemsWebPart extends BaseClientSideWebPart<IListItemsWe
   private items: IPropertyPaneDropdownOption[];
   private columns: IPropertyPaneDropdownOption[];
   private errorMessage: string;
-  private columns: IPropertyPaneDropdownOption[];
 
   public render(): void {
     const element: React.ReactElement<IListItemsProps> = React.createElement(ListItems, {
@@ -61,7 +60,7 @@ export default class ListItemsWebPart extends BaseClientSideWebPart<IListItemsWe
     return Version.parse('1.0');
   }
 
-  private async loadLists(newValue: any): Promise<IPropertyPaneDropdownOption[]> {
+  private async getAllLists(newValue: any): Promise<IPropertyPaneDropdownOption[]> {
     try {
       const lists = [];  
       const _lists: any = await getLists(newValue);
@@ -131,7 +130,7 @@ export default class ListItemsWebPart extends BaseClientSideWebPart<IListItemsWe
   protected onPropertyPaneConfigurationStart(): void {
     // eslint-disable-next-line no-void
     void this
-      .loadLists(this.properties.listName)
+      .loadLists()
       .then((listOptions: IPropertyPaneDropdownOption[]): void => {
         this.lists = listOptions;
         this.context.propertyPane.refresh();
